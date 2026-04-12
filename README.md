@@ -53,17 +53,13 @@ When the system was run with real data, the following issues were observed:
 
 ## How to Run
 
-1.  Navigate to the `medium` directory:
-    ```bash
-    cd medium
-    ```
-2.  Run the visible tests:
+1.  Run the visible tests:
     ```bash
     node tests/visible.test.js
     ```
     These tests are designed to fail initially. Your goal is to fix `medium/src/**/*.js` files until all tests pass.
 
-3.  (Optional) Run the `runner.js` to see a simulation of the system's operations:
+2.  (Optional) Run the `runner.js` to see a simulation of the system's operations:
     ```bash
     node runner.js
     ```
