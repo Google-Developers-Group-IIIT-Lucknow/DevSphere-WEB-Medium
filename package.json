@@ -1,0 +1,21 @@
+{
+  "name": "gdg-data-systems-challenge",
+  "version": "1.0.0",
+  "description": "A college-level hackathon coding challenge repository simulating real-world broken systems.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "hackathon",
+    "coding-challenge",
+    "data-systems",
+    "debugging",
+    "nodejs"
+  ],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

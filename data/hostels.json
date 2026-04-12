@@ -1,0 +1,41 @@
+[{
+    "id": "H001",
+    "name": "Girls Hostel A",
+    "gender": "Female",
+    "rooms": [{
+      "id": "R001",
+      "hostelId": "H001",
+      "roomNumber": "A101",
+      "gender": "Female",
+      "capacity": 2,
+      "occupants": []
+    }, {
+      "id": "R002",
+      "hostelId": "H001",
+      "roomNumber": "A102",
+      "gender": "Female",
+      "capacity": 1,
+      "occupants": []
+    }]
+  },
+  {
+    "id": "H002",
+    "name": "Boys Hostel B",
+    "gender": "Male",
+    "rooms": [{
+      "id": "R003",
+      "hostelId": "H002",
+      "roomNumber": "B201",
+      "gender": "Male",
+      "capacity": 3,
+      "occupants": []
+    }, {
+      "id": "R004",
+      "hostelId": "H002",
+      "roomNumber": "B202",
+      "gender": "Male",
+      "capacity": 2,
+      "occupants": []
+    }]
+  }
+]

@@ -1,0 +1,46 @@
+[{
+    "id": "S001",
+    "name": "Alice Smith",
+    "gender": "Female",
+    "program": "B.Tech",
+    "year": 2,
+    "hasAllotment": false,
+    "roomId": null
+  },
+  {
+    "id": "S002",
+    "name": "Bob Johnson",
+    "gender": "Male",
+    "program": "B.Tech",
+    "year": 3,
+    "hasAllotment": false,
+    "roomId": null
+  },
+  {
+    "id": "S003",
+    "name": "Charlie Brown",
+    "gender": "Male",
+    "program": "M.Tech",
+    "year": 1,
+    "hasAllotment": false,
+    "roomId": null
+  },
+  {
+    "id": "S004",
+    "name": "Diana Prince",
+    "gender": "Female",
+    "program": "B.Tech",
+    "year": 4,
+    "hasAllotment": false,
+    "roomId": null
+  },
+  {
+    "id": "S005",
+    "name": "Eve Adams",
+    "gender": "Female",
+    "program": "B.Tech",
+    "year": 2,
+    "hasAllotment": false,
+    "roomId": null
+  }
+]
