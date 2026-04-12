@@ -1,0 +1,6 @@
+{
+    "name": "DevSphere PR Grader",
+    "description": "Privileged grader triggered via workflow_run. Has access to secrets. Handles duplicate check, commit verification (FOSS), leaderboard API call, and PR labels.",
+    "iconName": "octicon-trophy",
+    "categories": ["CI", "Automation"]
+}

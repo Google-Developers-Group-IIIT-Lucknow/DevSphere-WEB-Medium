@@ -1,0 +1,6 @@
+{
+    "name": "DevSphere Fork CI",
+    "description": "Runs tests and read-only checks on fork pushes. Provides early feedback using participant's own CI minutes.",
+    "iconName": "octicon-beaker",
+    "categories": ["CI", "Testing"]
+}

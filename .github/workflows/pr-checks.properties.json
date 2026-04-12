@@ -1,0 +1,6 @@
+{
+    "name": "DevSphere PR Checks",
+    "description": "Authoritative test run triggered on PR open/update. Runs in the base repo context — participants cannot tamper with it.",
+    "iconName": "octicon-check-circle",
+    "categories": ["CI", "Testing"]
+}

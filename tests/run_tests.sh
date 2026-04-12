@@ -1,0 +1,139 @@
+#!/usr/bin/env bash
+# =============================================================
+#  DevSphere — Test Runner Template
+#
+#  INSTRUCTIONS FOR TASK CREATORS:
+#  ─────────────────────────────────────────────────────────────
+#  1. Copy this entire _template/ directory into your task repo.
+#  2. Edit the "CONFIGURE" section below to match your task.
+#  3. See SCORER_GUIDE.md for detailed guidance and examples.
+#
+#  Platform support:
+#    Windows  — works via Git for Windows (bundles bash + utilities)
+#    macOS    — works natively; TLE uses gtimeout if coreutils installed
+#    Linux    — full support
+#
+#  This script must:
+#    - Exit 0  when ALL tests pass
+#    - Exit 1  when ANY test fails (compilation, wrong output,
+#              TLE, runtime error, etc.)
+#
+#  It is called by:
+#    - The pre-commit hook  (on participant's machine)
+#    - fork-ci.yml          (on fork push, participant's CI)
+#    - pr-checks.yml        (on PR, authoritative)
+# =============================================================
+set -uo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+SAMPLES="$ROOT/samples"
+
+# ╔═════════════════════════════════════════════════════════════╗
+# ║  CONFIGURE — edit this section for your specific task      ║
+# ╚═════════════════════════════════════════════════════════════╝
+
+# ── Option A: C / C++ solution ────────────────────────────────
+# SOLUTION_FILE="$ROOT/solution.cpp"
+# BIN="$ROOT/solution_bin"
+# compile() { g++ -O2 -std=c++17 -o "$BIN" "$SOLUTION_FILE"; }
+# run()     { "$BIN" < "$1"; }
+
+# ── Option B: Python solution ─────────────────────────────────
+# SOLUTION_FILE="$ROOT/solution.py"
+# compile() { python3 -m py_compile "$SOLUTION_FILE"; }
+# run()     { python3 "$SOLUTION_FILE" < "$1"; }
+
+# ── Option C: JavaScript / Node solution ─────────────────────
+# SOLUTION_FILE="$ROOT/solution.js"
+# compile() { node --check "$SOLUTION_FILE"; }
+# run()     { node "$SOLUTION_FILE" < "$1"; }
+
+── Option D: Custom build step (web / app tasks) ─────────────
+compile() {
+  cd "$ROOT"
+  npm ci --silent
+  npm run build 2>&1
+}
+run() {
+  # For non-stdio tasks, adapt this to run your checker script
+  node "$ROOT/tests/visible.test.js" "$1"
+}
+
+# ── Set your timeout (seconds) ────────────────────────────────
+TIMEOUT=40
+
+# ── Uncomment exactly ONE compile and ONE run above, then ─────
+# ── delete or comment out the rest.  Remove this line too: ────
+echo "       See SCORER_GUIDE.md for instructions."      >&2
+
+# ╔═════════════════════════════════════════════════════════════╗
+# ║  TEST RUNNER — do not modify below this line               ║
+# ╚═════════════════════════════════════════════════════════════╝
+
+# ── Cross-platform timeout helper ─────────────────────────────
+# GNU timeout (Linux/WSL/CI): timeout 40s ./bin
+# macOS + brew coreutils:     gtimeout 40s ./bin
+# Git Bash on Windows:        no GNU timeout locally — runs without
+#                             time limit (CI always enforces it on
+#                             Linux runners)
+_run_timed() {
+  local secs=$1; shift
+  if command -v timeout &>/dev/null && timeout --version &>/dev/null 2>&1; then
+    timeout "${secs}s" "$@"
+  elif command -v gtimeout &>/dev/null; then
+    gtimeout "${secs}s" "$@"
+  else
+    "$@"
+  fi
+}
+
+echo "── Compile ──────────────────────────────────────────────"
+if ! compile 2>&1; then
+  echo ""
+  echo "FATAL: Build/compile step failed."
+  exit 1
+fi
+echo "OK"
+echo ""
+
+echo "── Tests ────────────────────────────────────────────────"
+PASS=0
+FAIL=0
+
+for in_file in "$SAMPLES"/in_*.txt; do
+  [[ -e "$in_file" ]] || { echo "No test inputs found in samples/"; break; }
+
+  name=$(basename "$in_file" .txt | sed 's/^in_//')
+  exp="$SAMPLES/out_${name}.txt"
+
+  if [[ ! -f "$exp" ]]; then
+    echo "SKIP  $name  (no expected output file out_${name}.txt)"
+    continue
+  fi
+
+  if actual=$(_run_timed "$TIMEOUT" bash -c 'run "$1"' _ "$in_file" 2>/dev/null); then
+    # Strip trailing whitespace to tolerate CRLF vs LF differences
+    if diff <(printf '%s\n' "$actual" | sed 's/[[:space:]]*$//') \
+            <(sed 's/[[:space:]]*$//' "$exp") > /dev/null 2>&1; then
+      echo "PASS  $name"
+      PASS=$((PASS + 1))
+    else
+      echo "FAIL  $name  — wrong output"
+      echo "  expected: $(head -3 "$exp" | tr '\n' '|')"
+      echo "  got:      $(printf '%s\n' "$actual" | head -3 | tr '\n' '|')"
+      FAIL=$((FAIL + 1))
+    fi
+  else
+    ec=$?
+    [[ $ec -eq 124 ]] && echo "FAIL  $name  — TLE (>${TIMEOUT}s)" \
+                       || echo "FAIL  $name  — runtime error (exit $ec)"
+    FAIL=$((FAIL + 1))
+  fi
+done
+
+echo ""
+echo "────────────────────────────────────────────────────────"
+echo "  Result: $PASS passed, $FAIL failed"
+echo "────────────────────────────────────────────────────────"
+
+[[ $FAIL -eq 0 ]]

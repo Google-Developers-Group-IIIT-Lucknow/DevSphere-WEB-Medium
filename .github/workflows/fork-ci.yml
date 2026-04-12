@@ -1,0 +1,90 @@
+name: Fork CI
+
+# ─────────────────────────────────────────────────────────────
+#  TASK CREATOR CHECKLIST:
+#  1. Copy this file into your task repo at the same path.
+#  2. If this is NOT a FOSS repo, the "check-commit" job is
+#     automatically skipped (no TARGET_COMMIT_HASH secret set).
+#  3. No other changes needed — runs/tests are defined in
+#     tests/run_tests.sh.
+# ─────────────────────────────────────────────────────────────
+on:
+  push:
+
+jobs:
+  run-tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    outputs:
+      passed: ${{ steps.tests.outputs.passed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore sample files from main
+        run: |
+          git fetch origin main --depth=1
+          git checkout origin/main -- samples/
+
+      - name: Run test suite
+        id: tests
+        run: |
+          chmod +x tests/run_tests.sh
+          if bash tests/run_tests.sh; then
+            echo "passed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "passed=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+  check-readonly:
+    name: Read-Only Files
+    runs-on: ubuntu-latest
+    outputs:
+      passed: ${{ steps.check.outputs.passed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for read-only violations
+        id: check
+        run: |
+          git fetch origin main --depth=1
+          VIOLATIONS=""
+          while IFS= read -r entry; do
+            # Strip Windows-style CR if the file has CRLF line endings
+            entry="${entry%$'\r'}"
+            [[ -z "$entry" || "$entry" == \#* ]] && continue
+            if ! git diff --quiet origin/main HEAD -- "$entry" 2>/dev/null; then
+              VIOLATIONS="$VIOLATIONS\n  - $entry"
+            fi
+          done < .readonly-files
+          if [[ -n "$VIOLATIONS" ]]; then
+            echo "Protected files modified:"
+            printf '%b\n' "$VIOLATIONS"
+            echo "passed=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          echo "No protected files modified."
+          echo "passed=true" >> "$GITHUB_OUTPUT"
+
+  summary:
+    name: Summary
+    runs-on: ubuntu-latest
+    needs: [run-tests, check-readonly]
+    if: always()
+    steps:
+      - run: |
+          echo "Tests:      ${{ needs.run-tests.outputs.passed }}"
+          echo "Read-only:  ${{ needs.check-readonly.outputs.passed }}"
+          ALL_PASS=true
+          [[ "${{ needs.run-tests.outputs.passed }}"      != "true" ]] && ALL_PASS=false
+          [[ "${{ needs.check-readonly.outputs.passed }}" != "true" ]] && ALL_PASS=false
+          if [[ "$ALL_PASS" == "true" ]]; then
+            echo "All checks passed — you may open a PR."
+          else
+            echo "One or more checks failed — fix before opening a PR."
+            exit 1
+          fi
