@@ -1,0 +1,27 @@
+# =============================================================
+#  Read-only files — participants must NOT modify these.
+#  One path per line. Glob patterns not supported.
+#  Lines starting with # are ignored.
+# =============================================================
+
+# CI workflows
+.github/workflows/fork-ci.yml
+.github/workflows/pr-checks.yml
+.github/workflows/pr-grader.yml
+.github/workflows/fork-ci.properties.json
+.github/workflows/pr-checks.properties.json
+.github/workflows/pr-grader.properties.json
+
+# Data infrastructure
+data/hostels.json
+data/students.json
+data/swapRequests.json
+
+# Test infrastructure
+tests/run_tests.sh
+tests/visible.test.js
+./runner.js
+
+# Repo metadata
+README.md
+.readonly-files

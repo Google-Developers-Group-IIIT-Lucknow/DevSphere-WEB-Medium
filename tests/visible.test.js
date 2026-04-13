@@ -28,6 +28,7 @@ const {
 const initialStudentsData = require('../data/students.json');
 const initialHostelsData = require('../data/hostels.json');
 const initialSwapRequestsData = require('../data/swapRequests.json');
+const { exit } = require('process');
 
 let students = [];
 let rooms = [];
@@ -239,6 +240,8 @@ console.log(`Success Rate: ${((passedTests / totalTests) * 100).toFixed(1)}%`);
 
 if (failedTests === 0) {
   console.log('🎉 All tests passed!');
+  process.exit(0);
 } else {
   console.log(`⚠️ ${failedTests} test(s) failed`);
+  process.exit(1);
 }

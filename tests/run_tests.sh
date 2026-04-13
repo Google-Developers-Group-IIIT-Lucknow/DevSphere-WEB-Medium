@@ -48,11 +48,11 @@ SAMPLES="$ROOT/samples"
 # compile() { node --check "$SOLUTION_FILE"; }
 # run()     { node "$SOLUTION_FILE" < "$1"; }
 
-── Option D: Custom build step (web / app tasks) ─────────────
+#── Option D: Custom build step (web / app tasks) ─────────────
 compile() {
   cd "$ROOT"
   npm ci --silent
-  npm run build 2>&1
+
 }
 run() {
   # For non-stdio tasks, adapt this to run your checker script
@@ -63,8 +63,7 @@ run() {
 TIMEOUT=40
 
 # ── Uncomment exactly ONE compile and ONE run above, then ─────
-# ── delete or comment out the rest.  Remove this line too: ────
-echo "       See SCORER_GUIDE.md for instructions."      >&2
+
 
 # ╔═════════════════════════════════════════════════════════════╗
 # ║  TEST RUNNER — do not modify below this line               ║
@@ -97,43 +96,20 @@ echo "OK"
 echo ""
 
 echo "── Tests ────────────────────────────────────────────────"
-PASS=0
-FAIL=0
-
-for in_file in "$SAMPLES"/in_*.txt; do
-  [[ -e "$in_file" ]] || { echo "No test inputs found in samples/"; break; }
-
-  name=$(basename "$in_file" .txt | sed 's/^in_//')
-  exp="$SAMPLES/out_${name}.txt"
-
-  if [[ ! -f "$exp" ]]; then
-    echo "SKIP  $name  (no expected output file out_${name}.txt)"
-    continue
-  fi
-
-  if actual=$(_run_timed "$TIMEOUT" bash -c 'run "$1"' _ "$in_file" 2>/dev/null); then
-    # Strip trailing whitespace to tolerate CRLF vs LF differences
-    if diff <(printf '%s\n' "$actual" | sed 's/[[:space:]]*$//') \
-            <(sed 's/[[:space:]]*$//' "$exp") > /dev/null 2>&1; then
-      echo "PASS  $name"
-      PASS=$((PASS + 1))
-    else
-      echo "FAIL  $name  — wrong output"
-      echo "  expected: $(head -3 "$exp" | tr '\n' '|')"
-      echo "  got:      $(printf '%s\n' "$actual" | head -3 | tr '\n' '|')"
-      FAIL=$((FAIL + 1))
-    fi
+if _run_timed "$TIMEOUT" node "$ROOT/tests/visible.test.js"; then
+  echo ""
+  echo "────────────────────────────────────────────────────────"
+  echo "  Result: tests passed"
+  echo "────────────────────────────────────────────────────────"
+  exit 0
+else
+  ec=$?
+  if [[ $ec -eq 124 ]]; then
+    echo "FAIL  — TLE (>${TIMEOUT}s)"
   else
-    ec=$?
-    [[ $ec -eq 124 ]] && echo "FAIL  $name  — TLE (>${TIMEOUT}s)" \
-                       || echo "FAIL  $name  — runtime error (exit $ec)"
-    FAIL=$((FAIL + 1))
+    echo "FAIL  — runtime/test failure (exit $ec)"
   fi
-done
-
-echo ""
-echo "────────────────────────────────────────────────────────"
-echo "  Result: $PASS passed, $FAIL failed"
-echo "────────────────────────────────────────────────────────"
+  exit 1
+fi
 
 [[ $FAIL -eq 0 ]]
