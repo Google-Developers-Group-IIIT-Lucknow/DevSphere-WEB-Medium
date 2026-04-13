@@ -218,8 +218,8 @@ jobs:
             '{
               sender:     { login: $login },
               repository: { full_name: $repo },
-              task_title: "CHANGE_ME",   # ← CHANGE: foss | web | app
-              difficulty: "CHANGE_ME",   # ← CHANGE: easy | medium | hard
+              task_title: "web",
+              difficulty: "medium",
               commit_time: $time
             }')
 
