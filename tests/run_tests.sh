@@ -26,7 +26,6 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-SAMPLES="$ROOT/samples"
 
 # ╔═════════════════════════════════════════════════════════════╗
 # ║  CONFIGURE — edit this section for your specific task      ║
@@ -50,9 +49,8 @@ SAMPLES="$ROOT/samples"
 
 #── Option D: Custom build step (web / app tasks) ─────────────
 compile() {
-  cd "$ROOT"
-  npm ci --silent
-
+  node --check "$ROOT/tests/visible.test.js"
+  node --check "$ROOT/runner.js"
 }
 run() {
   # For non-stdio tasks, adapt this to run your checker script
@@ -111,5 +109,3 @@ else
   fi
   exit 1
 fi
-
-[[ $FAIL -eq 0 ]]

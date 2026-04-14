@@ -28,7 +28,11 @@ jobs:
       - name: Restore sample files from base main
         run: |
           git fetch origin main --depth=1
-          git checkout origin/main -- samples/
+          if git ls-tree -d --name-only origin/main | grep -qx "samples"; then
+            git checkout origin/main -- samples/
+          else
+            echo "No samples/ directory on origin/main; skipping restore."
+          fi
 
       - name: Run test suite
         id: tests
